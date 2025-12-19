@@ -1,0 +1,99 @@
+/* client/src/components/Footer.css */
+
+.footer-container {
+  font-size: 0.9rem;
+  background-color: #2e363e; /* Màu nền xám đậm theo ảnh mẫu */
+}
+
+/* Nội dung text chung và danh sách liên hệ */
+.footer-text,
+.contact-list li span {
+  color: #adb5bd; /* Màu xám nhạt */
+  line-height: 1.8;
+}
+
+/* Đoạn text dài ở cột Về Chúng Tôi */
+.footer-text.large-text {
+  text-align: justify;
+  padding-right: 15px; /* Thêm khoảng đệm để không quá sát */
+}
+
+/* Danh sách liên hệ */
+.contact-list {
+  padding-left: 0;
+  margin-bottom: 1rem;
+}
+.contact-list li {
+  display: flex; /* Canh icon và text */
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+.contact-list svg {
+  color: #adb5bd; /* Màu icon */
+  margin-top: 4px; /* Căn chỉnh icon với text */
+}
+
+/* Các link điều hướng */
+.footer-links .nav-link {
+  padding: 0.3rem 0; /* Giảm padding */
+  color: #adb5bd; /* Màu xám nhạt */
+  transition: color 0.2s ease;
+}
+
+.footer-links .nav-link:hover {
+  color: #ffffff; /* Màu trắng khi hover */
+}
+
+/* ===== RESPONSIVE STYLES ===== */
+
+/* Tablet and below: Adjust spacing */
+@media (max-width: 992px) {
+  .footer-container {
+    font-size: 0.875rem;
+  }
+  
+  .footer-text.large-text {
+    padding-right: 10px;
+  }
+}
+
+/* Mobile: Stack columns and reduce spacing */
+@media (max-width: 768px) {
+  .footer-container .row > div {
+    margin-bottom: 2rem;
+  }
+  
+  .footer-text.large-text {
+    text-align: left;
+    padding-right: 0;
+  }
+  
+  .contact-list {
+    font-size: 0.9rem;
+  }
+  
+  .footer-links .nav-link {
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+  }
+}
+
+/* Small mobile: Further reduce spacing */
+@media (max-width: 576px) {
+  .footer-container {
+    font-size: 0.85rem;
+    padding: 2rem 1rem;
+  }
+  
+  .footer-text.large-text {
+    font-size: 0.85rem;
+  }
+  
+  .contact-list {
+    font-size: 0.85rem;
+  }
+  
+  .contact-list li {
+    margin-bottom: 0.4rem;
+  }
+}

@@ -1,0 +1,17 @@
+/* client/src/components/ProductReviews.css */
+
+/* Style cho phần phản hồi của Shop */
+.shop-reply-container {
+  background-color: #f8f9fa; /* Nền xám nhạt ở Light Mode */
+  border-left: 4px solid #0d6efd; /* Viền xanh bên trái */
+}
+
+/* Dark Mode Support */
+[data-bs-theme="dark"] .shop-reply-container {
+  background-color: #2b3035; /* Nền tối ở Dark Mode */
+  border-left: 4px solid #0d6efd;
+}
+
+[data-bs-theme="dark"] .shop-reply-container .text-secondary {
+  color: #e0e0e0 !important; /* Chữ nội dung phản hồi màu sáng */
+}

@@ -1,0 +1,119 @@
+/* client/src/components/PromoBanners.css */
+
+.promo-banner-large,
+.promo-banner-small {
+  display: block;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  text-decoration: none;
+
+  /* QUAN TRỌNG: Luôn set màu trắng cho chữ trên banner ảnh */
+  color: #ffffff !important;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.promo-banner-large:hover,
+.promo-banner-small:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  color: #ffffff !important; /* Vẫn giữ màu trắng khi hover */
+}
+
+.promo-banner-large {
+  min-height: 430px;
+}
+
+.promo-banner-small {
+  min-height: 200px;
+}
+
+/* Lớp phủ mờ để chữ dễ đọc - Giữ nguyên */
+.promo-banner-large::before,
+.promo-banner-small::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.6) 0%,
+    /* Tăng độ tối lên 0.6 để chữ trắng rõ hơn */ rgba(0, 0, 0, 0.1) 100%
+  );
+  z-index: 1;
+}
+
+.promo-content {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 2;
+  width: 100%; /* Đảm bảo nội dung có không gian */
+  padding-right: 20px;
+}
+
+/* Đảm bảo các thẻ H bên trong cũng màu trắng */
+.promo-content h2,
+.promo-content h4,
+.promo-content h5,
+.promo-content p {
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* Thêm bóng chữ để nổi bật */
+}
+
+/* ===== RESPONSIVE STYLES (Giữ nguyên) ===== */
+@media (max-width: 992px) {
+  .promo-banner-large {
+    min-height: 350px;
+  }
+  .promo-banner-small {
+    min-height: 180px;
+  }
+  .promo-content h2 {
+    font-size: 1.5rem;
+  }
+  .promo-content p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .promo-banner-large {
+    min-height: 250px;
+  }
+  .promo-banner-small {
+    min-height: 150px;
+  }
+  .promo-content {
+    bottom: 15px;
+    left: 15px;
+  }
+  .promo-content h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+  .promo-content p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .promo-banner-large {
+    min-height: 220px;
+  }
+  .promo-banner-small {
+    min-height: 130px;
+  }
+  .promo-content h2 {
+    font-size: 1.1rem;
+  }
+  .promo-content p {
+    font-size: 0.8rem;
+  }
+}

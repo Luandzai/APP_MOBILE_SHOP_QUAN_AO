@@ -1,0 +1,61 @@
+/* client/src/components/UserVouchers.css */
+
+/* ===== VARIABLES ===== */
+:root {
+  --voucher-card-bg: #ffffff;
+  --voucher-border: rgba(0, 0, 0, 0.08);
+}
+
+[data-bs-theme="dark"] {
+  --voucher-card-bg: #21262d;
+  --voucher-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ===== VOUCHER CARD ===== */
+.voucher-card {
+  background: var(--voucher-card-bg);
+  border: 1px solid var(--voucher-border);
+  border-radius: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.voucher-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Voucher Info Container */
+.voucher-info {
+  flex: 1;
+  min-width: 0; /* Quan trọng để text có thể truncate */
+  padding-right: 0.75rem;
+}
+
+/* Voucher Code - Truncate nếu quá dài */
+.voucher-code {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Voucher Badge */
+.voucher-badge {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 576px) {
+  .voucher-code {
+    font-size: 0.9rem;
+  }
+  
+  .voucher-badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+  }
+}

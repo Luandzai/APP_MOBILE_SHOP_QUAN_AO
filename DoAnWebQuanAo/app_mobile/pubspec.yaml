@@ -1,0 +1,72 @@
+name: app_mobile
+description: "Blank Canvas - Ứng dụng mua sắm quần áo"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  provider: ^6.1.1
+
+  # HTTP Client
+  dio: ^5.4.0
+
+  # Storage
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2
+
+  # Navigation
+  go_router: ^13.1.0
+
+  # UI Components
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  flutter_widget_from_html: ^0.15.0  # Alternative to flutter_html
+  carousel_slider: ^4.2.1
+  photo_view: ^0.14.0
+  image_picker: ^1.0.7
+
+  # Google Sign-In
+  google_sign_in: ^6.2.1
+
+  # URL Launcher (cho payment redirect)
+  url_launcher: ^6.3.2
+
+  # Other utilities
+  equatable: ^2.0.5
+  flutter_rating_bar: ^4.0.1
+  app_links: ^6.1.1  # Deep linking
+  
+  # Formatting
+  intl: any
+  flutter_localizations:
+    sdk: flutter
+  dtd: ^4.0.0
+  flutter_lints: ^6.0.0
+  google_fonts: ^6.3.3
+  json_rpc_2: ^4.0.0
+  path: ^1.9.1
+  stack_trace: ^1.12.1
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/fonts/

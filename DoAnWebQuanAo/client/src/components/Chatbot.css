@@ -1,0 +1,238 @@
+/* client/src/components/Chatbot.css */
+
+/* Nút tròn nổi ở góc (Bubble) */
+.chatbot-bubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background-color: #000;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  transition: transform 0.3s ease;
+}
+.chatbot-bubble:hover {
+  transform: scale(1.1);
+}
+
+/* Cửa sổ chat chính */
+.chatbot-window {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 350px;
+  height: 500px;
+  background: white; /* Mặc định Light */
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9998;
+  border: 1px solid #eee;
+}
+
+/* Header cửa sổ chat */
+.chatbot-header {
+  background-color: #000;
+  color: white;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
+
+/* Khu vực hiển thị tin nhắn */
+.chatbot-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background-color: #f5f5f5; /* Mặc định Light */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Style chung cho tin nhắn */
+.message {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Tin nhắn của người dùng (User) */
+.message.user {
+  align-self: flex-end;
+  background-color: #000;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+/* Tin nhắn của AI (Bot) */
+.message.bot {
+  align-self: flex-start;
+  background-color: #e4e6eb; /* Mặc định Light */
+  color: black;
+  border-bottom-left-radius: 4px;
+}
+
+/* --- RICH UI: Danh sách sản phẩm gợi ý --- */
+.chat-product-list {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 5px 0;
+  margin-top: 5px;
+  max-width: 100%;
+}
+
+.chat-product-list::-webkit-scrollbar {
+  height: 4px;
+}
+.chat-product-list::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+/* Thẻ sản phẩm nhỏ trong chat */
+.chat-product-card {
+  min-width: 140px;
+  width: 140px;
+  background: white; /* Mặc định Light */
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.chat-product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chat-product-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+.chat-product-info {
+  padding: 8px;
+}
+
+.chat-product-name {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #333; /* Mặc định Light */
+}
+
+.chat-product-price {
+  font-size: 12px;
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Khu vực nhập liệu */
+.chatbot-input {
+  display: flex;
+  padding: 10px;
+  background: white; /* Mặc định Light */
+  border-top: 1px solid #ddd;
+}
+.chatbot-input input {
+  flex: 1;
+  border: none;
+  background: #f0f2f5; /* Mặc định Light */
+  padding: 10px 15px;
+  border-radius: 20px;
+  outline: none;
+  color: #000;
+}
+.chatbot-input button {
+  background: none;
+  border: none;
+  margin-left: 10px;
+  color: #000;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.chatbot-input button:disabled {
+  color: #ccc;
+}
+
+/* Hiệu ứng đang gõ */
+.typing {
+  color: #888;
+  font-size: 12px;
+  margin-left: 10px;
+  font-style: italic;
+}
+
+/* =========================================================
+   DARK MODE OVERRIDES (QUAN TRỌNG)
+   Phần này sẽ ghi đè màu sắc khi bật chế độ tối
+   ========================================================= */
+[data-bs-theme="dark"] .chatbot-window {
+  background-color: #2b3035; /* Nền cửa sổ tối */
+  border-color: #495057;
+}
+
+[data-bs-theme="dark"] .chatbot-messages {
+  background-color: #212529; /* Nền vùng chat tối hơn */
+}
+
+[data-bs-theme="dark"] .message.bot {
+  background-color: #343a40; /* Nền tin nhắn bot tối */
+  color: #e0e0e0; /* Chữ bot sáng */
+}
+
+[data-bs-theme="dark"] .chatbot-input {
+  background-color: #2b3035;
+  border-top-color: #495057;
+}
+
+[data-bs-theme="dark"] .chatbot-input input {
+  background-color: #343a40; /* Nền input tối */
+  color: #fff; /* Chữ input trắng */
+}
+
+[data-bs-theme="dark"] .chatbot-input button {
+  color: #fff; /* Nút gửi màu trắng */
+}
+
+[data-bs-theme="dark"] .chatbot-input button:disabled {
+  color: #6c757d;
+}
+
+/* Fix thẻ sản phẩm trong Dark Mode */
+[data-bs-theme="dark"] .chat-product-card {
+  background-color: #343a40;
+  border-color: #495057;
+}
+
+[data-bs-theme="dark"] .chat-product-name {
+  color: #e0e0e0;
+}

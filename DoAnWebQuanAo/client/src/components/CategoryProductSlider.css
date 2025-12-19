@@ -1,0 +1,66 @@
+/* client/src/components/CategoryProductSlider.css (File MỚI) */
+
+/* 1. Header (Tiêu đề + Nút Xem tất cả) */
+.category-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.category-slider-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.btn-view-all {
+  background-color: #000;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+.btn-view-all:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+/* 2. Tùy chỉnh Swiper */
+.product-swiper-container {
+  padding: 0 5px; /* Thêm padding để nút không bị dính */
+}
+
+/* Tùy chỉnh nút Next/Prev (giống ảnh) */
+.product-swiper-container .swiper-button-next,
+.product-swiper-container .swiper-button-prev {
+  color: #000; /* Màu đen */
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  width: 35px; /* To hơn 1 chút */
+  height: 35px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  top: 40%; /* Đẩy lên cao 1 chút (vì ảnh vuông) */
+}
+
+.product-swiper-container .swiper-button-next::after,
+.product-swiper-container .swiper-button-prev::after {
+  font-size: 16px !important; /* Thu nhỏ mũi tên */
+  font-weight: 900;
+}
+
+.product-swiper-container .swiper-button-prev {
+  left: -10px;
+}
+.product-swiper-container .swiper-button-next {
+  right: -10px;
+}
+
+/* Ẩn nút nếu bị vô hiệu hóa */
+.product-swiper-container .swiper-button-disabled {
+  display: none;
+}

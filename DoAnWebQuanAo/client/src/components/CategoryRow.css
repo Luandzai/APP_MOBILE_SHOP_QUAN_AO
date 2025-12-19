@@ -1,0 +1,5 @@
+/* client/src/components/CategoryRow.css */
+.category-name-span {
+    display: flex;
+    align-items: center;
+}

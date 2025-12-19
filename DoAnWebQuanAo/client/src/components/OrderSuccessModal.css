@@ -1,0 +1,14 @@
+/* client/src/components/OrderSuccessModal.css */
+
+.success-modal-icon {
+  width: 80px;
+  height: 80px;
+  background-color: #eafbf3; /* Nền xanh lá nhạt */
+  color: #28a745; /* Màu xanh lá đậm */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+  font-size: 2.5rem; /* Kích thước icon check */
+}

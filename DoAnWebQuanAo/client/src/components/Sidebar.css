@@ -1,0 +1,130 @@
+/* client/src/components/Sidebar.css */
+
+.sidebar-container {
+  padding: 1.5rem;
+  background-color: var(--bs-body-bg, #fdfdfd);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  color: var(--bs-body-color, #1a1a2e);
+}
+
+.sidebar-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Tùy chỉnh Accordion (Bộ lọc) */
+.sidebar-container .accordion-item {
+  border: none;
+  border-bottom: 1px solid #eee;
+}
+
+.sidebar-container .accordion-button {
+  font-weight: 600;
+  padding: 1rem 0;
+  font-size: 0.95rem;
+}
+
+.sidebar-container .accordion-button:not(.collapsed) {
+  background-color: transparent;
+  box-shadow: none;
+  color: #0d6efd;
+}
+
+.sidebar-container .accordion-button:focus {
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.sidebar-container .accordion-body {
+  padding: 0 0 1rem 0;
+}
+
+/* Bộ lọc màu sắc (Color Swatches) */
+.color-swatch-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+}
+
+.color-swatch.active {
+  border-color: #0d6efd; /* Viền xanh khi được chọn */
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #0d6efd;
+}
+
+/* Bộ lọc kích thước (Size Buttons) */
+.size-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.size-btn {
+  min-width: 45px;
+  font-weight: 500;
+}
+
+/* ===== RESPONSIVE STYLES ===== */
+
+/* Tablet and below: Full width sidebar */
+@media (max-width: 992px) {
+  .sidebar-container {
+    padding: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .sidebar-title {
+    font-size: 1.1rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .sidebar-container .accordion-button {
+    padding: 0.875rem 0;
+    font-size: 0.9rem;
+  }
+}
+
+/* Mobile: Smaller swatches and buttons */
+@media (max-width: 576px) {
+  .sidebar-container {
+    padding: 0.875rem;
+  }
+  
+  .sidebar-title {
+    font-size: 1rem;
+  }
+  
+  .color-swatch {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .size-btn {
+    min-width: 40px;
+    font-size: 0.85rem;
+    padding: 0.375rem 0.5rem;
+  }
+  
+  .sidebar-container .accordion-button {
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+  }
+  
+  .sidebar-container .accordion-body {
+    padding: 0 0 0.875rem 0;
+  }
+}

@@ -1,0 +1,116 @@
+/* client/src/pages/AuthPage.css (Nội dung MỚI) */
+
+/* 1. Nền của toàn bộ trang */
+.auth-page-wrapper {
+  background-color: #ffffff;
+
+  /* Đây là code CSS mô phỏng lại các hình tròn vàng
+    và họa tiết trên nền trắng như trong video 
+  */
+  background-image: radial-gradient(
+      circle at 15% 25%,
+      rgba(254, 230, 77, 0.3) 20%,
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 85% 75%,
+      rgba(254, 230, 77, 0.3) 25%,
+      transparent 25%
+    ),
+    radial-gradient(circle at 90% 15%, rgba(0, 0, 0, 0.03) 10%, transparent 10%);
+
+  /* Căn giữa Card theo chiều dọc và ngang */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Đảm bảo trang có chiều cao tối thiểu và có padding */
+  min-height: calc(100dvh - 150px); /* Lấy 100% chiều cao trừ đi header/footer */
+  padding: 3rem 1rem;
+}
+
+/* 2. Thẻ Card chính */
+.auth-card-container {
+  max-width: 900px; /* Giới hạn chiều rộng của card */
+  width: 100%;
+  border: none;
+  border-radius: 1rem; /* Bo góc mạnh hơn */
+  overflow: hidden; /* Quan trọng: để bo góc cho ảnh bên trái */
+}
+
+/* 3. Cột hình ảnh (bên trái) */
+.auth-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none; /* Ẩn ảnh trên di động */
+}
+
+/* 4. Cột Form (bên phải) */
+.auth-form-content {
+  padding: 2.5rem; /* Tăng padding cho đẹp */
+}
+
+/* 5. Logo */
+.auth-logo {
+  max-width: 180px; /* Đặt chiều rộng cho logo */
+  margin-bottom: 0.5rem;
+}
+
+/* 6. Link chuyển đổi (Đăng nhập / Đăng ký) */
+.auth-toggle-link {
+  font-size: 0.9rem;
+  color: #6c757d; /* Màu chữ xám */
+}
+.auth-toggle-link button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0d6efd; /* Màu link xanh */
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+/* 7. Hiển thị ảnh khi màn hình đủ lớn */
+@media (min-width: 768px) {
+  .auth-card-image {
+    display: block; /* Hiển thị lại ảnh trên màn hình md trở lên */
+  }
+}
+
+/* ===== ADDITIONAL RESPONSIVE STYLES ===== */
+
+/* Mobile: Optimize form layout */
+@media (max-width: 768px) {
+  .auth-page-wrapper {
+    padding: 2rem 1rem;
+    min-height: calc(100dvh - 100px);
+  }
+  
+  .auth-card-container {
+    box-shadow: none;
+  }
+  
+  .auth-form-content {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* Small mobile: Further optimizations */
+@media (max-width: 576px) {
+  .auth-page-wrapper {
+    padding: 1.5rem 0.5rem;
+  }
+  
+  .auth-form-content {
+    padding: 1.5rem 1rem;
+  }
+  
+  .auth-logo {
+    max-width: 150px;
+  }
+  
+  .auth-toggle-link {
+    font-size: 0.85rem;
+  }
+}

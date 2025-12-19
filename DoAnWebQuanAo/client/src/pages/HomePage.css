@@ -1,0 +1,215 @@
+/* client/src/pages/HomePage.css */
+
+/* ===== VARIABLES ===== */
+:root {
+  --home-section-bg: #f8f9fa;
+  --home-heading-color: #1a1a2e;
+  --home-accent: #0d6efd;
+}
+
+[data-bs-theme="dark"] {
+  --home-section-bg: #161b22;
+  --home-heading-color: #e6edf3;
+}
+
+/* ===== SECTION TITLES ===== */
+.section-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.section-title h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--home-heading-color);
+  display: inline-block;
+  padding-bottom: 0.75rem;
+  position: relative;
+}
+
+.section-title h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--home-accent), #ff6b6b);
+  border-radius: 2px;
+}
+
+/* ===== PRODUCT GRID SECTION ===== */
+.product-section {
+  padding: 3rem 0;
+}
+
+.product-section:nth-child(odd) {
+  background: var(--home-section-bg);
+}
+
+/* ===== HERO CAROUSEL IMPROVEMENTS ===== */
+.carousel {
+  position: relative;
+}
+
+.carousel-item img {
+  filter: brightness(0.85);
+  transition: transform 8s ease-out;
+}
+
+.carousel-item.active img {
+  transform: scale(1.05);
+}
+
+.carousel-caption {
+  bottom: 25%;
+  text-align: left;
+  left: 10%;
+  right: 40%;
+}
+
+.carousel-caption h3 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+  animation: fadeInUp 0.8s ease;
+}
+
+.carousel-caption p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Carousel Indicators */
+.carousel-indicators {
+  bottom: 20px;
+}
+
+.carousel-indicators button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: 0 6px;
+  opacity: 0.5;
+  transition: all 0.3s;
+}
+
+.carousel-indicators button.active {
+  opacity: 1;
+  transform: scale(1.2);
+  background: var(--home-accent);
+}
+
+/* Carousel Navigation */
+.carousel-control-prev,
+.carousel-control-next {
+  width: 60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.carousel:hover .carousel-control-prev,
+.carousel:hover .carousel-control-next {
+  opacity: 0.8;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  background-size: 50%;
+}
+
+/* ===== CATEGORY SLIDER DARK MODE ===== */
+[data-bs-theme="dark"] .category-slider-header {
+  border-bottom-color: #30363d;
+}
+
+[data-bs-theme="dark"] .btn-view-all {
+  background-color: #30363d;
+}
+
+[data-bs-theme="dark"] .btn-view-all:hover {
+  background-color: #484f58;
+}
+
+[data-bs-theme="dark"] .product-swiper-container .swiper-button-next,
+[data-bs-theme="dark"] .product-swiper-container .swiper-button-prev {
+  background-color: rgba(48, 54, 61, 0.9);
+  color: #e6edf3;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+  .carousel-caption {
+    left: 5%;
+    right: 20%;
+    bottom: 20%;
+  }
+
+  .carousel-caption h3 {
+    font-size: 2rem;
+  }
+
+  .section-title h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .carousel-item img {
+    max-height: 350px;
+  }
+
+  .carousel-caption {
+    left: 5%;
+    right: 10%;
+    bottom: 15%;
+  }
+
+  .carousel-caption h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .carousel-caption p {
+    font-size: 0.9rem;
+    display: none;
+  }
+
+  .section-title h2 {
+    font-size: 1.25rem;
+  }
+
+  .product-section {
+    padding: 2rem 0;
+  }
+
+  .carousel-indicators {
+    bottom: 10px;
+  }
+
+  .carousel-indicators button {
+    width: 8px;
+    height: 8px;
+    margin: 0 4px;
+  }
+}
