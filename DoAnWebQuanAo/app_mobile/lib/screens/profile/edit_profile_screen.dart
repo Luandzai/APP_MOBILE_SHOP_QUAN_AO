@@ -8,7 +8,7 @@ import '../../core/utils/validators.dart';
 import '../../providers/auth_provider.dart';
 
 /// Edit Profile Screen - Cập nhật thông tin cá nhân
-/// 
+///
 /// Cho phép user chỉnh sửa họ tên, SĐT, địa chỉ, ngày sinh
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -35,7 +35,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _phoneController = TextEditingController(text: user?.dienThoai ?? '');
       _addressController = TextEditingController(text: user?.diaChi ?? '');
       _selectedDate = user?.ngaySinh;
-      _selectedGender = user?.gioiTinh;
+
+      // Normalize gender to match dropdown values
+      if (user?.gioiTinh != null) {
+        final g = user!.gioiTinh!.toUpperCase();
+        if (g == 'NAM') {
+          _selectedGender = 'NAM';
+        } else if (g == 'NU' || g == 'NỮ') {
+          _selectedGender = 'NU';
+        } else if (g == 'KHAC' || g == 'KHÁC') {
+          _selectedGender = 'KHAC';
+        } else {
+          _selectedGender = null;
+        }
+      } else {
+        _selectedGender = null;
+      }
       _isInitialized = true;
     }
   }
@@ -56,7 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       lastDate: DateTime.now(),
       locale: const Locale('vi', 'VN'),
     );
-    
+
     if (picked != null) {
       setState(() => _selectedDate = picked);
     }
@@ -66,14 +81,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final auth = context.read<AuthProvider>();
-    
+
     final success = await auth.updateProfile(
       hoTen: _nameController.text.trim(),
-      dienThoai: _phoneController.text.trim().isNotEmpty 
-          ? _phoneController.text.trim() 
+      dienThoai: _phoneController.text.trim().isNotEmpty
+          ? _phoneController.text.trim()
           : null,
-      diaChi: _addressController.text.trim().isNotEmpty 
-          ? _addressController.text.trim() 
+      diaChi: _addressController.text.trim().isNotEmpty
+          ? _addressController.text.trim()
           : null,
       ngaySinh: _selectedDate,
       gioiTinh: _selectedGender,
@@ -110,7 +125,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           if (auth.user == null) {
             return const Center(child: Text('Vui lòng đăng nhập'));
           }
-          
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSizes.paddingLg),
             child: Form(
@@ -133,9 +148,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSizes.xl),
-                  
+
                   // Email (disabled)
                   TextFormField(
                     initialValue: auth.user!.email,
@@ -147,9 +162,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       fillColor: AppColors.surfaceVariant,
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSizes.md),
-                  
+
                   // Full name
                   TextFormField(
                     controller: _nameController,
@@ -160,9 +175,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     validator: Validators.fullName,
                   ),
-                  
+
                   const SizedBox(height: AppSizes.md),
-                  
+
                   // Phone
                   TextFormField(
                     controller: _phoneController,
@@ -176,9 +191,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       return Validators.phone(value);
                     },
                   ),
-                  
+
                   const SizedBox(height: AppSizes.md),
-                  
+
                   // Address
                   TextFormField(
                     controller: _addressController,
@@ -189,9 +204,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       alignLabelWithHint: true,
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSizes.md),
-                  
+
                   // Date of birth
                   GestureDetector(
                     onTap: () => _selectDate(context),
@@ -201,21 +216,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           labelText: AppStrings.dateOfBirth,
                           prefixIcon: const Icon(Icons.calendar_today_outlined),
                           suffixIcon: const Icon(Icons.arrow_drop_down),
-                          hintText: _selectedDate != null 
-                              ? _formatDate(_selectedDate!) 
+                          hintText: _selectedDate != null
+                              ? _formatDate(_selectedDate!)
                               : 'Chọn ngày sinh',
                         ),
                         controller: TextEditingController(
-                          text: _selectedDate != null 
-                              ? _formatDate(_selectedDate!) 
+                          text: _selectedDate != null
+                              ? _formatDate(_selectedDate!)
                               : '',
                         ),
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSizes.md),
-                  
+
                   // Gender
                   DropdownButtonFormField<String>(
                     value: _selectedGender,
@@ -232,9 +247,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       setState(() => _selectedGender = value);
                     },
                   ),
-                  
+
                   const SizedBox(height: AppSizes.xxl),
-                  
+
                   // Save button
                   ElevatedButton(
                     onPressed: auth.isLoading ? null : _handleSave,
@@ -251,9 +266,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           )
                         : const Text(AppStrings.save),
                   ),
-                  
+
                   const SizedBox(height: AppSizes.md),
-                  
+
                   // Error message
                   if (auth.error != null)
                     Container(
@@ -264,8 +279,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline, 
-                            color: AppColors.error, 
+                          const Icon(
+                            Icons.error_outline,
+                            color: AppColors.error,
                             size: AppSizes.iconSm,
                           ),
                           const SizedBox(width: AppSizes.sm),
@@ -276,7 +292,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close, size: AppSizes.iconSm),
+                            icon: const Icon(
+                              Icons.close,
+                              size: AppSizes.iconSm,
+                            ),
                             onPressed: () => auth.clearError(),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),

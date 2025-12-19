@@ -8,7 +8,8 @@ class ApiEndpoints {
   // Android Emulator: 10.0.2.2
   // iOS Simulator: localhost
   // Real device: IP máy chủ thật
-  static const String baseUrl = 'http://10.0.2.2:5000/api';
+  // static const String baseUrl = 'http://10.0.2.2:5000/api';
+  static const String baseUrl = 'http://192.168.1.34:5000/api';
 
   // ============ AUTH ============
   static const String login = '/auth/login';
@@ -73,7 +74,7 @@ class ApiEndpoints {
 
   // ============ SHIPPING ============
   static const String shipping = '/shipping';
-  
+
   // ============ ADDRESSES ============
   static const String savedAddresses = '/user/addresses';
 
@@ -86,4 +87,3 @@ class ApiEndpoints {
   // ============ CONTACT ============
   static const String contact = '/contact';
 }
-
