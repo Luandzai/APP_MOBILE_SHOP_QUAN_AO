@@ -7,3 +7,4 @@ export 'cart_provider.dart';
 export 'wishlist_provider.dart';
 export 'voucher_provider.dart';
 export 'order_provider.dart';
+export 'category_provider.dart';

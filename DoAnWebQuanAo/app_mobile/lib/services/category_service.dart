@@ -27,12 +27,47 @@ class CategoryService {
   /// Lấy danh mục dạng cây (cha-con)
   Future<List<Category>> getCategoriesTree() async {
     try {
-      final response = await _apiClient.get('${ApiEndpoints.categories}/tree');
+      // Backend chưa có endpoint /tree, nên ta gọi endpoint lấy tất cả (dạng phẳng)
+      // sau đó tự build tree ở phía client.
+      final response = await _apiClient.get(ApiEndpoints.categories);
       final List<dynamic> data = response.data;
-      return data.map((e) => Category.fromJson(e)).toList();
+
+      // 1. Convert to List<Map> to easy manipulation
+      List<Map<String, dynamic>> categoriesData =
+          List<Map<String, dynamic>>.from(data);
+
+      // 2. Build tree
+      return _buildTree(categoriesData);
     } on DioException catch (e) {
+      // Fallback or rethrow
       throw ApiException.fromDioException(e);
     }
+  }
+
+  List<Category> _buildTree(List<Map<String, dynamic>> flatList) {
+    final Map<int, Map<String, dynamic>> map = {};
+    final List<Map<String, dynamic>> roots = [];
+
+    // 1. Create map for O(1) access
+    for (var cat in flatList) {
+      // Ensure children list exists
+      cat['children'] = <Map<String, dynamic>>[];
+      map[cat['DanhMucID']] = cat;
+    }
+
+    // 2. Link children to parents
+    for (var cat in flatList) {
+      final parentId = cat['DanhMucChaID'];
+      if (parentId != null && map.containsKey(parentId)) {
+        map[parentId]!['children'].add(cat);
+      } else {
+        // No parent, or parent not found -> Root
+        roots.add(cat);
+      }
+    }
+
+    // 3. Convert Map tree to List<Category>
+    return roots.map((e) => Category.fromJson(e)).toList();
   }
 
   /// Lấy chi tiết danh mục theo slug
