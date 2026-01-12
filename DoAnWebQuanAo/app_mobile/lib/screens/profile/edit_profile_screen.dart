@@ -21,7 +21,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
-  late TextEditingController _addressController;
   DateTime? _selectedDate;
   String? _selectedGender;
   bool _isInitialized = false;
@@ -33,7 +32,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final user = context.read<AuthProvider>().user;
       _nameController = TextEditingController(text: user?.hoTen ?? '');
       _phoneController = TextEditingController(text: user?.dienThoai ?? '');
-      _addressController = TextEditingController(text: user?.diaChi ?? '');
       _selectedDate = user?.ngaySinh;
 
       // Normalize gender to match dropdown values
@@ -59,7 +57,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _addressController.dispose();
     super.dispose();
   }
 
@@ -86,9 +83,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       hoTen: _nameController.text.trim(),
       dienThoai: _phoneController.text.trim().isNotEmpty
           ? _phoneController.text.trim()
-          : null,
-      diaChi: _addressController.text.trim().isNotEmpty
-          ? _addressController.text.trim()
           : null,
       ngaySinh: _selectedDate,
       gioiTinh: _selectedGender,
@@ -190,19 +184,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       if (value == null || value.isEmpty) return null;
                       return Validators.phone(value);
                     },
-                  ),
-
-                  const SizedBox(height: AppSizes.md),
-
-                  // Address
-                  TextFormField(
-                    controller: _addressController,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: AppStrings.address,
-                      prefixIcon: Icon(Icons.location_on_outlined),
-                      alignLabelWithHint: true,
-                    ),
                   ),
 
                   const SizedBox(height: AppSizes.md),

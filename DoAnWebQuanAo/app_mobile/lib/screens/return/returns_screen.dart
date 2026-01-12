@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/utils/formatters.dart';
 import '../../models/return_request.dart';
 import '../../services/return_service.dart';
+import '../../router/app_router.dart';
 
 /// Returns Screen - Danh sách yêu cầu hoàn trả
 class ReturnsScreen extends StatefulWidget {
@@ -48,6 +50,13 @@ class _ReturnsScreenState extends State<ReturnsScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         title: const Text('Yêu cầu hoàn trả'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go(Routes.home),
+            tooltip: 'Về trang chủ',
+          ),
+        ],
       ),
       body: _buildBody(),
     );
@@ -79,7 +88,11 @@ class _ReturnsScreenState extends State<ReturnsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.assignment_return_outlined, size: 64, color: Colors.grey[400]),
+            Icon(
+              Icons.assignment_return_outlined,
+              size: 64,
+              color: Colors.grey[400],
+            ),
             const SizedBox(height: AppSizes.md),
             Text(
               'Chưa có yêu cầu hoàn trả',
@@ -120,21 +133,21 @@ class _ReturnsScreenState extends State<ReturnsScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            
+
             // Date
             Text(
               'Ngày yêu cầu: ${Formatters.date(request.ngayYeuCau)}',
               style: const TextStyle(fontSize: 12, color: AppColors.textHint),
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             // Reason
             Text(
               'Lý do: ${request.lyDoHoanTra}',
               style: const TextStyle(fontSize: 13),
             ),
-            
+
             // Admin note
             if (request.ghiChuAdmin != null) ...[
               const SizedBox(height: 8),
@@ -148,7 +161,12 @@ class _ReturnsScreenState extends State<ReturnsScreen> {
                   children: [
                     const Icon(Icons.info_outline, size: 16),
                     const SizedBox(width: 8),
-                    Expanded(child: Text(request.ghiChuAdmin!, style: const TextStyle(fontSize: 12))),
+                    Expanded(
+                      child: Text(
+                        request.ghiChuAdmin!,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -163,10 +181,10 @@ class _ReturnsScreenState extends State<ReturnsScreen> {
     Color bgColor;
     Color textColor;
     String text;
-    
+
     switch (status) {
       case 'CHO_XU_LY':
-      case 'PENDING':  // Server có thể trả về tiếng Anh
+      case 'PENDING': // Server có thể trả về tiếng Anh
         bgColor = Colors.orange.shade50;
         textColor = Colors.orange.shade800;
         text = 'Chờ xử lý';
@@ -194,7 +212,7 @@ class _ReturnsScreenState extends State<ReturnsScreen> {
         textColor = AppColors.textSecondary;
         text = status;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -203,7 +221,11 @@ class _ReturnsScreenState extends State<ReturnsScreen> {
       ),
       child: Text(
         text,
-        style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: textColor,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

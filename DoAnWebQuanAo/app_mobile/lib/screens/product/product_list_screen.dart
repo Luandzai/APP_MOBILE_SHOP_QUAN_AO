@@ -18,12 +18,7 @@ class ProductListScreen extends StatefulWidget {
   final String? search;
   final String? sort;
 
-  const ProductListScreen({
-    super.key,
-    this.category,
-    this.search,
-    this.sort,
-  });
+  const ProductListScreen({super.key, this.category, this.search, this.sort});
 
   @override
   State<ProductListScreen> createState() => _ProductListScreenState();
@@ -40,7 +35,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     super.initState();
     _selectedCategory = widget.category;
     _selectedSort = widget.sort;
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProducts();
       _loadCategories();
@@ -94,7 +89,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         title: Text(
-          widget.search != null 
+          widget.search != null
               ? 'Tìm kiếm: "${widget.search}"'
               : AppStrings.products,
         ),
@@ -105,17 +100,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
             onPressed: () => context.push(Routes.search),
           ),
           // Filter
-          IconButton(
-            icon: const Icon(Icons.tune),
-            onPressed: _openFilterSheet,
-          ),
+          IconButton(icon: const Icon(Icons.tune), onPressed: _openFilterSheet),
         ],
       ),
       body: Column(
         children: [
           // Active filters
           _buildActiveFilters(),
-          
+
           // Product grid
           Expanded(
             child: Consumer<ProductProvider>(
@@ -125,15 +117,16 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   isLoading: provider.isLoading,
                   isLoadingMore: provider.isLoadingMore,
                   onLoadMore: () => provider.loadMoreProducts(),
-                  onProductTap: (product) => 
+                  onProductTap: (product) =>
                       context.push('${Routes.products}/${product.slug}'),
-                  onFavoritePressed: (product) =>
-                      context.read<WishlistProvider>().toggleWishlist(
-                        product.id, 
-                        product: product,
-                      ),
-                  favoriteIds: context.watch<WishlistProvider>()
-                      .wishlist.map((p) => p.id).toSet(),
+                  onFavoritePressed: (product) => context
+                      .read<WishlistProvider>()
+                      .toggleWishlist(product.id, product: product),
+                  favoriteIds: context
+                      .watch<WishlistProvider>()
+                      .wishlist
+                      .map((p) => p.id)
+                      .toSet(),
                 );
               },
             ),
@@ -144,10 +137,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   Widget _buildActiveFilters() {
-    final hasFilters = _selectedCategory != null || 
-                       _selectedPriceRange != null || 
-                       _selectedSort != null;
-    
+    final hasFilters =
+        _selectedCategory != null ||
+        _selectedPriceRange != null ||
+        _selectedSort != null;
+
     if (!hasFilters) return const SizedBox.shrink();
 
     return Container(
@@ -184,11 +178,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return Container(
       margin: const EdgeInsets.only(right: AppSizes.sm),
       child: Chip(
-        label: Text(label, style: const TextStyle(fontSize: 12)),
-        deleteIcon: const Icon(Icons.close, size: 16),
+        label: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        deleteIcon: const Icon(Icons.close, size: 16, color: Colors.white),
         onDeleted: onRemove,
-        backgroundColor: AppColors.primary.withAlpha(25),
-        deleteIconColor: AppColors.primary,
+        backgroundColor: AppColors.primary,
         labelPadding: const EdgeInsets.only(left: 8),
         padding: const EdgeInsets.symmetric(horizontal: 4),
       ),
@@ -197,21 +197,31 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   String _getSortLabel(String sort) {
     switch (sort) {
-      case 'newest': return AppStrings.sortNewest;
-      case 'price-asc': return AppStrings.sortPriceLowHigh;
-      case 'price-desc': return AppStrings.sortPriceHighLow;
-      case 'bestselling': return AppStrings.sortBestSelling;
-      default: return sort;
+      case 'newest':
+        return AppStrings.sortNewest;
+      case 'price-asc':
+        return AppStrings.sortPriceLowHigh;
+      case 'price-desc':
+        return AppStrings.sortPriceHighLow;
+      case 'bestselling':
+        return AppStrings.sortBestSelling;
+      default:
+        return sort;
     }
   }
 
   String _getPriceLabel(String range) {
     switch (range) {
-      case '0-500000': return 'Dưới 500k';
-      case '500000-1000000': return '500k - 1tr';
-      case '1000000-2000000': return '1tr - 2tr';
-      case '2000000-100000000': return 'Trên 2tr';
-      default: return range;
+      case '0-500000':
+        return 'Dưới 500k';
+      case '500000-1000000':
+        return '500k - 1tr';
+      case '1000000-2000000':
+        return '1tr - 2tr';
+      case '2000000-100000000':
+        return 'Trên 2tr';
+      default:
+        return range;
     }
   }
 }

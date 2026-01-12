@@ -53,17 +53,20 @@ class CartItemCard extends StatelessWidget {
               // Checkbox
               if (onSelect != null)
                 Checkbox(
-                  value: isSelected,
-                  onChanged: (_) => onSelect?.call(),
+                  value: item.isOutOfStock ? false : isSelected,
+                  onChanged: item.isOutOfStock ? null : (_) => onSelect?.call(),
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   visualDensity: VisualDensity.compact,
+                  fillColor: item.isOutOfStock
+                      ? MaterialStateProperty.all(Colors.grey[300])
+                      : null,
                 ),
-              
+
               // Product image
               _buildImage(),
-              
+
               const SizedBox(width: AppSizes.sm),
-              
+
               // Product info
               Expanded(
                 child: Column(
@@ -74,14 +77,18 @@ class CartItemCard extends StatelessWidget {
                       item.tenSanPham ?? 'Sản phẩm',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
+                        color: item.isOutOfStock ? Colors.grey : null,
+                        decoration: item.isOutOfStock
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 4),
-                    
+
                     // Variant info
                     if (item.thuocTinh != null && item.thuocTinh!.isNotEmpty)
                       Text(
@@ -91,12 +98,57 @@ class CartItemCard extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                       ),
-                    
+
+                    // Stock warning
+                    if (item.isOutOfStock)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withAlpha(25),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Hết hàng',
+                          style: TextStyle(
+                            color: AppColors.error,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      )
+                    else if (item.isExceedsStock)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withAlpha(25),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Chỉ còn ${item.soLuongTonKho} sản phẩm',
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+
                     const SizedBox(height: AppSizes.sm),
-                    
-                    // Price and quantity
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                    // Price and quantity - use Column to avoid overflow
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
                         // Price
                         Text(
@@ -107,7 +159,7 @@ class CartItemCard extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        
+
                         // Quantity controls
                         _buildQuantityControls(),
                       ],
@@ -115,7 +167,7 @@ class CartItemCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Remove button
               if (onRemove != null)
                 IconButton(
@@ -163,17 +215,23 @@ class CartItemCard extends StatelessWidget {
   }
 
   Widget _buildQuantityControls() {
+    final maxQty = item.soLuongTonKho ?? 999;
+    final isEnabled = !item.isOutOfStock;
+
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(
+          color: isEnabled ? AppColors.divider : Colors.grey[300]!,
+        ),
         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+        color: isEnabled ? null : Colors.grey[100],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Decrease
           InkWell(
-            onTap: item.soLuong > 1 && onQuantityChanged != null
+            onTap: isEnabled && item.soLuong > 1 && onQuantityChanged != null
                 ? () => onQuantityChanged!(item.soLuong - 1)
                 : null,
             child: Container(
@@ -181,39 +239,47 @@ class CartItemCard extends StatelessWidget {
               child: Icon(
                 Icons.remove,
                 size: 16,
-                color: item.soLuong > 1 ? AppColors.textPrimary : AppColors.textHint,
+                color: isEnabled && item.soLuong > 1
+                    ? AppColors.textPrimary
+                    : Colors.grey[400],
               ),
             ),
           ),
-          
+
           // Quantity
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
               border: Border.symmetric(
-                vertical: BorderSide(color: AppColors.divider),
+                vertical: BorderSide(
+                  color: isEnabled ? AppColors.divider : Colors.grey[300]!,
+                ),
               ),
             ),
             child: Text(
               '${item.soLuong}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
+                color: isEnabled ? AppColors.textPrimary : Colors.grey[400],
               ),
             ),
           ),
-          
+
           // Increase
           InkWell(
-            onTap: onQuantityChanged != null
+            onTap:
+                isEnabled && item.soLuong < maxQty && onQuantityChanged != null
                 ? () => onQuantityChanged!(item.soLuong + 1)
                 : null,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: const Icon(
+              child: Icon(
                 Icons.add,
                 size: 16,
-                color: AppColors.textPrimary,
+                color: isEnabled && item.soLuong < maxQty
+                    ? AppColors.textPrimary
+                    : Colors.grey[400],
               ),
             ),
           ),

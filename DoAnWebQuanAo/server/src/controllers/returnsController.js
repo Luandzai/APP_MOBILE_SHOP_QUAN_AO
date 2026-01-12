@@ -49,9 +49,9 @@ exports.requestReturn = async (req, res) => {
       });
     }
 
-    // 2. Kiểm tra trùng lặp
+    // 2. Kiểm tra trùng lặp (Chỉ chặn nếu đang có yêu cầu PENDING hoặc đã được duyệt/hoàn tất)
     const [existingReturns] = await connection.query(
-      "SELECT * FROM returns WHERE DonHangID = ?",
+      "SELECT * FROM returns WHERE DonHangID = ? AND Status != 'REJECTED'",
       [DonHangID]
     );
 

@@ -12,6 +12,7 @@ exports.getCart = async (req, res) => {
       `SELECT 
          ct.PhienBanID, ct.SoLuong, 
          sp.TenSanPham, sp.Slug, pb.GiaBan, pb.SKU,
+         pb.SoLuongTonKho,
          (SELECT GROUP_CONCAT(CONCAT(tt.TenThuocTinh, ': ', gtt.GiaTri) SEPARATOR ', ')
           FROM chitietphienban AS ctpb
           JOIN giatrithuoctinh AS gtt ON ctpb.GiaTriID = gtt.GiaTriID
@@ -159,6 +160,24 @@ exports.removeFromCart = async (req, res) => {
 
     res.json({ message: "Đã xóa sản phẩm" });
   } catch (error) {
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+// @desc    Xóa toàn bộ giỏ hàng
+// @route   DELETE /api/cart/clear
+// @access  Private
+exports.clearCart = async (req, res) => {
+  try {
+    const NguoiDungID = req.user.NguoiDungID;
+
+    await pool.query("DELETE FROM chitietgiohang WHERE GioHangID = ?", [
+      NguoiDungID,
+    ]);
+
+    res.json({ message: "Đã xóa toàn bộ giỏ hàng" });
+  } catch (error) {
+    console.error("Lỗi khi xóa giỏ hàng:", error);
     res.status(500).json({ message: "Lỗi server" });
   }
 };

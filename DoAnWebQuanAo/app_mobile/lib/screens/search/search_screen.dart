@@ -21,7 +21,7 @@ class _SearchScreenState extends State<SearchScreen> {
   // Suggestions - có thể load từ API
   final List<String> _suggestions = [
     'Áo thun',
-    'Quần jeans',
+    'Quần jean',
     'Áo khoác',
     'Váy đầm',
     'Áo sơ mi',
@@ -137,7 +137,11 @@ class _SearchScreenState extends State<SearchScreen> {
                       search,
                       style: const TextStyle(color: AppColors.textPrimary),
                     ),
-                    avatar: const Icon(Icons.history, size: 16, color: AppColors.textSecondary),
+                    avatar: const Icon(
+                      Icons.history,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
                     onPressed: () {
                       _searchController.text = search;
                       _search(search);
@@ -163,7 +167,11 @@ class _SearchScreenState extends State<SearchScreen> {
                     suggestion,
                     style: const TextStyle(color: AppColors.textPrimary),
                   ),
-                  avatar: const Icon(Icons.trending_up, size: 16, color: AppColors.primary),
+                  avatar: const Icon(
+                    Icons.trending_up,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
                   onPressed: () {
                     _searchController.text = suggestion;
                     _search(suggestion);

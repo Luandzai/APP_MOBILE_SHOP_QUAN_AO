@@ -21,7 +21,7 @@ const protect = async (req, res, next) => {
       // Lấy thông tin người dùng (trừ mật khẩu) từ payload của token
       // và gắn vào `req.user` để các hàm controller sau có thể sử dụng
       const [users] = await pool.query(
-        "SELECT NguoiDungID, HoTen, Email, VaiTro, TrangThai FROM nguoidung WHERE NguoiDungID = ?",
+        "SELECT NguoiDungID, HoTen, Email, VaiTro, TrangThai, DienThoai, NgaySinh, GioiTinh FROM nguoidung WHERE NguoiDungID = ?",
         [decoded.id]
       );
 

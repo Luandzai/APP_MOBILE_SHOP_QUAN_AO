@@ -3,20 +3,21 @@ import 'product.dart';
 import 'product_variant.dart';
 
 /// Model CartItem - Sản phẩm trong giỏ hàng
-/// 
+///
 /// Mỗi item trong giỏ là một sản phẩm + phiên bản cụ thể
 class CartItem extends Equatable {
-  final int id;              // GioHangID từ DB hoặc local ID
+  final int id; // GioHangID từ DB hoặc local ID
   final int sanPhamId;
   final int phienBanId;
   final int soLuong;
-  final bool daChon;         // Đã chọn để checkout chưa
-  
+  final bool daChon; // Đã chọn để checkout chưa
+
   // Thông tin sản phẩm đi kèm (để hiển thị)
   final String? tenSanPham;
   final String? hinhAnh;
   final double? giaBan;
-  final String? thuocTinh;   // "Màu: Đen, Size: M"
+  final String? thuocTinh; // "Màu: Đen, Size: M"
+  final int? soLuongTonKho; // Số lượng tồn kho hiện tại
 
   const CartItem({
     required this.id,
@@ -28,10 +29,17 @@ class CartItem extends Equatable {
     this.hinhAnh,
     this.giaBan,
     this.thuocTinh,
+    this.soLuongTonKho,
   });
 
   /// Tổng tiền của item
   double get thanhTien => (giaBan ?? 0) * soLuong;
+
+  /// Kiểm tra còn hàng không
+  bool get isOutOfStock => soLuongTonKho != null && soLuongTonKho! <= 0;
+
+  /// Kiểm tra số lượng vượt quá tồn kho
+  bool get isExceedsStock => soLuongTonKho != null && soLuong > soLuongTonKho!;
 
   /// Cập nhật số lượng
   CartItem copyWithQuantity(int newQuantity) {
@@ -45,6 +53,7 @@ class CartItem extends Equatable {
       hinhAnh: hinhAnh,
       giaBan: giaBan,
       thuocTinh: thuocTinh,
+      soLuongTonKho: soLuongTonKho,
     );
   }
 
@@ -60,6 +69,7 @@ class CartItem extends Equatable {
       hinhAnh: hinhAnh,
       giaBan: giaBan,
       thuocTinh: thuocTinh,
+      soLuongTonKho: soLuongTonKho,
     );
   }
 
@@ -76,6 +86,7 @@ class CartItem extends Equatable {
       hinhAnh: json['HinhAnh'],
       giaBan: _parseDouble(json['GiaBan']),
       thuocTinh: json['ThuocTinh'],
+      soLuongTonKho: _parseInt(json['SoLuongTonKho']),
     );
   }
 
@@ -110,6 +121,7 @@ class CartItem extends Equatable {
       'HinhAnh': hinhAnh,
       'GiaBan': giaBan,
       'ThuocTinh': thuocTinh,
+      'SoLuongTonKho': soLuongTonKho,
     };
   }
 
@@ -118,6 +130,14 @@ class CartItem extends Equatable {
     if (value is double) return value;
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
     return null;
   }
 

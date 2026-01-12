@@ -9,7 +9,7 @@ class ApiEndpoints {
   // iOS Simulator: localhost
   // Real device: IP máy chủ thật
   // static const String baseUrl = 'http://10.0.2.2:5000/api';
-  static const String baseUrl = 'http://192.168.1.34:5000/api';
+  static const String baseUrl = 'http://192.168.1.31:5000/api';
 
   // ============ AUTH ============
   static const String login = '/auth/login';
@@ -65,7 +65,9 @@ class ApiEndpoints {
 
   // ============ RETURNS ============
   static const String returns = '/returns';
-  static const String createReturn = '/orders/:orderId/return';
+  // Tạo yêu cầu đổi/trả: POST /returns với body { DonHangID, Reason, items }
+  // Không dùng /orders/:orderId/return - endpoint đó không tồn tại
+  static const String createReturn = '/returns';
 
   // ============ LOCATIONS ============
   static const String provinces = '/locations/provinces';

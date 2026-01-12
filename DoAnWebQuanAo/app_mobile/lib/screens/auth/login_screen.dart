@@ -7,6 +7,7 @@ import '../../core/constants/app_sizes.dart';
 import '../../core/utils/validators.dart';
 import '../../providers/auth_provider.dart';
 import '../../router/app_router.dart';
+import '../../services/google_sign_in_service.dart';
 
 /// Login Screen - Màn hình đăng nhập
 class LoginScreen extends StatefulWidget {
@@ -33,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
-    
+
     final success = await authProvider.login(
       email: _emailController.text.trim(),
       password: _passwordController.text,
@@ -45,18 +46,42 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleGoogleLogin() async {
-    // TODO: Implement Google Sign-In
-    // final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    // if (googleUser == null) return;
-    // final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    // await authProvider.googleLogin(googleToken: googleAuth.idToken!);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Google Sign-In sẽ được triển khai sau'),
-        backgroundColor: AppColors.info,
-      ),
-    );
+    final authProvider = context.read<AuthProvider>();
+    final googleService = GoogleSignInService();
+
+    try {
+      // Bước 1: Đăng nhập với Google để lấy ID token
+      final idToken = await googleService.signIn();
+
+      if (idToken == null) {
+        // User cancelled hoặc không lấy được token
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đăng nhập Google bị hủy'),
+              backgroundColor: AppColors.warning,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Bước 2: Gửi ID token lên backend để xác thực
+      final success = await authProvider.googleLogin(googleToken: idToken);
+
+      if (success && mounted) {
+        context.go(Routes.home);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi đăng nhập Google: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -72,21 +97,21 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSizes.xxl),
-                
+
                 // Logo
                 _buildLogo(),
-                
+
                 const SizedBox(height: AppSizes.xxl),
-                
+
                 // Title
                 Text(
                   AppStrings.login,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: AppSizes.xl),
-                
+
                 // Email field
                 TextFormField(
                   controller: _emailController,
@@ -98,9 +123,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   validator: Validators.email,
                 ),
-                
+
                 const SizedBox(height: AppSizes.md),
-                
+
                 // Password field
                 TextFormField(
                   controller: _passwordController,
@@ -112,8 +137,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword 
-                            ? Icons.visibility_outlined 
+                        _obscurePassword
+                            ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
                       ),
                       onPressed: () {
@@ -125,9 +150,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   validator: Validators.password,
                 ),
-                
+
                 const SizedBox(height: AppSizes.sm),
-                
+
                 // Forgot password link
                 Align(
                   alignment: Alignment.centerRight,
@@ -136,9 +161,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text(AppStrings.forgotPassword),
                   ),
                 ),
-                
+
                 const SizedBox(height: AppSizes.lg),
-                
+
                 // Login button
                 Consumer<AuthProvider>(
                   builder: (context, auth, _) {
@@ -159,14 +184,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: AppSizes.md),
-                
+
                 // Error message
                 Consumer<AuthProvider>(
                   builder: (context, auth, _) {
                     if (auth.error == null) return const SizedBox.shrink();
-                    
+
                     return Container(
                       padding: const EdgeInsets.all(AppSizes.sm),
                       decoration: BoxDecoration(
@@ -175,8 +200,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline, 
-                            color: AppColors.error, 
+                          const Icon(
+                            Icons.error_outline,
+                            color: AppColors.error,
                             size: AppSizes.iconSm,
                           ),
                           const SizedBox(width: AppSizes.sm),
@@ -187,7 +213,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close, size: AppSizes.iconSm),
+                            icon: const Icon(
+                              Icons.close,
+                              size: AppSizes.iconSm,
+                            ),
                             onPressed: () => auth.clearError(),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
@@ -197,15 +226,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: AppSizes.xl),
-                
+
                 // Divider
                 Row(
                   children: [
                     const Expanded(child: Divider()),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.md,
+                      ),
                       child: Text(
                         'hoặc',
                         style: Theme.of(context).textTheme.bodySmall,
@@ -214,9 +245,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Expanded(child: Divider()),
                   ],
                 ),
-                
+
                 const SizedBox(height: AppSizes.lg),
-                
+
                 // Google login button
                 OutlinedButton.icon(
                   onPressed: _handleGoogleLogin,
@@ -224,13 +255,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     'https://www.google.com/favicon.ico',
                     height: 20,
                     width: 20,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.g_mobiledata),
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.g_mobiledata),
                   ),
                   label: const Text(AppStrings.loginWithGoogle),
                 ),
-                
+
                 const SizedBox(height: AppSizes.xl),
-                
+
                 // Register link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -1,8 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'order_detail.dart';
 
 /// Model ReturnRequest - Yêu cầu hoàn trả
-/// 
+///
 /// Trạng thái: CHO_XU_LY → DA_DUYET / TU_CHOI → HOAN_THANH
 class ReturnRequest extends Equatable {
   final int id;
@@ -33,9 +32,9 @@ class ReturnRequest extends Equatable {
 
   /// Lấy tên trạng thái
   String get trangThaiText => _getTrangThaiText(trangThai);
-  
-  /// Có thể hủy yêu cầu không
-  bool get canCancel => trangThai == 'CHO_XU_LY';
+
+  /// Có thể hủy yêu cầu không (chỉ khi đang chờ xử lý)
+  bool get canCancel => trangThai == 'PENDING' || trangThai == 'CHO_XU_LY';
 
   factory ReturnRequest.fromJson(Map<String, dynamic> json) {
     return ReturnRequest(
@@ -51,13 +50,19 @@ class ReturnRequest extends Equatable {
       ngayXuLy: _parseDate(json['NgayXuLy']),
       ghiChuAdmin: json['GhiChuAdmin'] ?? json['AdminNote'],
       // Server không trả về SoTienHoanTra, default 0
-      soTienHoanTra: _parseDouble(json['SoTienHoanTra'] ?? json['RefundAmount']),
-      sanPhamHoanTra: (json['SanPhamHoanTra'] as List<dynamic>?)
-          ?.map((e) => ReturnItem.fromJson(e))
-          .toList() ?? [],
-      hinhAnh: (json['HinhAnh'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList() ?? [],
+      soTienHoanTra: _parseDouble(
+        json['SoTienHoanTra'] ?? json['RefundAmount'],
+      ),
+      sanPhamHoanTra:
+          (json['SanPhamHoanTra'] as List<dynamic>?)
+              ?.map((e) => ReturnItem.fromJson(e))
+              .toList() ??
+          [],
+      hinhAnh:
+          (json['HinhAnh'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
     );
   }
 
@@ -84,11 +89,26 @@ class ReturnRequest extends Equatable {
 
   static String _getTrangThaiText(String trangThai) {
     switch (trangThai) {
-      case 'CHO_XU_LY': return 'Chờ xử lý';
-      case 'DA_DUYET': return 'Đã duyệt';
-      case 'TU_CHOI': return 'Từ chối';
-      case 'HOAN_THANH': return 'Hoàn thành';
-      default: return trangThai;
+      // Backend trả về status tiếng Anh
+      case 'PENDING':
+        return 'Chờ xử lý';
+      case 'APPROVED':
+        return 'Đã duyệt';
+      case 'REJECTED':
+        return 'Từ chối';
+      case 'COMPLETED':
+        return 'Hoàn thành';
+      // Fallback cho status tiếng Việt (nếu có)
+      case 'CHO_XU_LY':
+        return 'Chờ xử lý';
+      case 'DA_DUYET':
+        return 'Đã duyệt';
+      case 'TU_CHOI':
+        return 'Từ chối';
+      case 'HOAN_THANH':
+        return 'Hoàn thành';
+      default:
+        return trangThai;
     }
   }
 

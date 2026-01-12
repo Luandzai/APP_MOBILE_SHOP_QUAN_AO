@@ -60,11 +60,11 @@ class DeepLinkHandler {
   /// Xử lý kết quả VNPAY
   void _handlePaymentResult(Uri uri) {
     final params = uri.queryParameters;
-    
+
     // VNPAY response params
     final vnpResponseCode = params['vnp_ResponseCode'];
     final vnpTxnRef = params['vnp_TxnRef'];
-    
+
     // Custom params
     final success = params['success'] == 'true' || vnpResponseCode == '00';
     final orderId = params['orderId'] ?? vnpTxnRef;
@@ -76,19 +76,25 @@ class DeepLinkHandler {
   /// Xử lý kết quả MoMo
   void _handleMomoResult(Uri uri) {
     final params = uri.queryParameters;
-    
-    // MoMo response params
-    final status = params['status'] ?? params['errorCode'];
+
+    // Backend MoMo return params: success=true/false, orderId=xxx
+    final successParam = params['success'];
     final orderId = params['orderId'] ?? params['requestId'];
     final message = params['message'] ?? params['localMessage'];
-    
-    final success = status == '0' || status == null;
+
+    // Check success param from backend or MoMo status
+    final status = params['status'] ?? params['errorCode'];
+    final success = successParam == 'true' || status == '0';
 
     _navigateToPaymentResult(success, orderId, message);
   }
 
   /// Navigate đến PaymentResult screen
-  void _navigateToPaymentResult(bool success, String? orderId, String? message) {
+  void _navigateToPaymentResult(
+    bool success,
+    String? orderId,
+    String? message,
+  ) {
     if (_context == null) return;
 
     final queryParams = <String, String>{
@@ -107,20 +113,34 @@ class DeepLinkHandler {
   /// Lấy message từ VNPAY response code
   String? _getVnpayMessage(String? responseCode) {
     switch (responseCode) {
-      case '00': return 'Thanh toán thành công';
-      case '07': return 'Trừ tiền thành công. Giao dịch bị nghi ngờ';
-      case '09': return 'Thẻ/Tài khoản chưa đăng ký InternetBanking';
-      case '10': return 'Xác thực thông tin thẻ/tài khoản không đúng quá 3 lần';
-      case '11': return 'Đã hết hạn chờ thanh toán';  
-      case '12': return 'Thẻ/Tài khoản bị khóa';
-      case '13': return 'Mật khẩu OTP không chính xác';
-      case '24': return 'Khách hàng hủy giao dịch';
-      case '51': return 'Tài khoản không đủ số dư';
-      case '65': return 'Tài khoản đã vượt quá hạn mức giao dịch trong ngày';
-      case '75': return 'Ngân hàng thanh toán đang bảo trì';
-      case '79': return 'Nhập sai mật khẩu quá số lần quy định';
-      case '99': return 'Lỗi không xác định';
-      default: return null;
+      case '00':
+        return 'Thanh toán thành công';
+      case '07':
+        return 'Trừ tiền thành công. Giao dịch bị nghi ngờ';
+      case '09':
+        return 'Thẻ/Tài khoản chưa đăng ký InternetBanking';
+      case '10':
+        return 'Xác thực thông tin thẻ/tài khoản không đúng quá 3 lần';
+      case '11':
+        return 'Đã hết hạn chờ thanh toán';
+      case '12':
+        return 'Thẻ/Tài khoản bị khóa';
+      case '13':
+        return 'Mật khẩu OTP không chính xác';
+      case '24':
+        return 'Khách hàng hủy giao dịch';
+      case '51':
+        return 'Tài khoản không đủ số dư';
+      case '65':
+        return 'Tài khoản đã vượt quá hạn mức giao dịch trong ngày';
+      case '75':
+        return 'Ngân hàng thanh toán đang bảo trì';
+      case '79':
+        return 'Nhập sai mật khẩu quá số lần quy định';
+      case '99':
+        return 'Lỗi không xác định';
+      default:
+        return null;
     }
   }
 

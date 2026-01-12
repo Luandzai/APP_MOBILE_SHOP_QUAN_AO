@@ -64,22 +64,38 @@ class _CartScreenState extends State<CartScreen> {
             children: [
               // Select all
               _buildSelectAllRow(cart),
-              
+
               // Cart items
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(bottom: AppSizes.paddingMd),
-                  itemCount: cart.items.length,
-                  itemBuilder: (context, index) {
-                    final item = cart.items[index];
-                    return CartItemCard(
-                      item: item,
-                      isSelected: item.daChon,
-                      onSelect: () => cart.toggleItemSelection(item.id),
-                      onRemove: () => _confirmRemove(context, item.id),
-                      onQuantityChanged: (qty) => cart.updateQuantity(item.id, qty),
-                    );
-                  },
+                child: RefreshIndicator(
+                  onRefresh: () => context.read<CartProvider>().loadCart(),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(bottom: AppSizes.paddingMd),
+                    itemCount: cart.items.length,
+                    itemBuilder: (context, index) {
+                      final item = cart.items[index];
+                      return CartItemCard(
+                        item: item,
+                        isSelected: item.daChon,
+                        onSelect: () => cart.toggleItemSelection(item.id),
+                        onRemove: () => _confirmRemove(context, item.id),
+                        onQuantityChanged: (qty) async {
+                          final success = await cart.updateQuantity(
+                            item.id,
+                            qty,
+                          );
+                          if (!success && mounted && cart.error != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(cart.error!),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          }
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -95,11 +111,7 @@ class _CartScreenState extends State<CartScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.shopping_cart_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: AppSizes.md),
           Text(
             AppStrings.emptyCart,
@@ -126,7 +138,7 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildSelectAllRow(CartProvider cart) {
     final allSelected = cart.items.every((item) => item.daChon);
-    
+
     return Container(
       color: AppColors.surface,
       padding: const EdgeInsets.symmetric(
@@ -194,13 +206,15 @@ class _CartScreenState extends State<CartScreen> {
                     ],
                   ),
                 ),
-                
+
                 // Checkout button
                 ElevatedButton(
-                  onPressed: cart.selectedItems.isEmpty ? null : () {
-                    // TODO: Navigate to checkout
-                    context.push(Routes.checkout);
-                  },
+                  onPressed: cart.selectedItems.isEmpty
+                      ? null
+                      : () {
+                          // TODO: Navigate to checkout
+                          context.push(Routes.checkout);
+                        },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSizes.paddingLg,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/utils/formatters.dart';
@@ -97,6 +98,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                   const SizedBox(height: AppSizes.lg),
 
+                  // Product list
+                  _buildSectionTitle('Sản phẩm (${selectedItems.length})'),
+                  _buildProductList(selectedItems),
+
+                  const SizedBox(height: AppSizes.lg),
+
                   // Shipping method
                   _buildSectionTitle('Phương thức vận chuyển'),
                   _buildShippingMethods(orderProvider),
@@ -138,6 +145,91 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Text(
         title,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildProductList(List<dynamic> items) {
+    return Card(
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: items.length,
+        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final item = items[index];
+          return Padding(
+            padding: const EdgeInsets.all(AppSizes.sm),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: item.hinhAnh != null
+                      ? Image.network(
+                          item.hinhAnh!,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 60,
+                            height: 60,
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.image_not_supported),
+                          ),
+                        )
+                      : Container(
+                          width: 60,
+                          height: 60,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.image_outlined),
+                        ),
+                ),
+                const SizedBox(width: AppSizes.sm),
+                // Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.tenSanPham ?? 'Sản phẩm',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      if (item.thuocTinh != null && item.thuocTinh!.isNotEmpty)
+                        Text(
+                          item.thuocTinh!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            Formatters.currency(item.giaBan ?? 0),
+                            style: const TextStyle(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'x${item.soLuong}',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -622,10 +714,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           '${Routes.paymentResult}?success=true&orderId=${result['orderId']}',
         );
       } else if (result['paymentUrl'] != null) {
-        // TODO: Open payment URL in webview
-        context.go(
-          '${Routes.paymentResult}?success=true&orderId=${result['orderId']}',
-        );
+        // Mở MoMo/VNPAY trong app hoặc browser
+        final url = Uri.parse(result['paymentUrl']);
+        try {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        } catch (e) {
+          debugPrint('Error launching payment URL: $e');
+        }
+        // Chuyển về trang đơn hàng - kết quả thanh toán sẽ được cập nhật bởi backend
+        if (mounted) {
+          context.go(Routes.orders);
+        }
       }
     } else if (order.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(

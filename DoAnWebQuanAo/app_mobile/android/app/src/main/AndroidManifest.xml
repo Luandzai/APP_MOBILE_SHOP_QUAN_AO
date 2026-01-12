@@ -59,5 +59,19 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- URL Launcher: Cho phép mở browser và các link https -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data android:scheme="http"/>
+        </intent>
+        <!-- MoMo App -->
+        <package android:name="com.momo.ewallet"/>
+        <package android:name="com.momo.sandbox"/>
     </queries>
 </manifest>

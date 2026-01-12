@@ -23,7 +23,9 @@ import '../screens/order/order_detail_screen.dart';
 import '../screens/return/returns_screen.dart';
 import '../screens/return/return_request_screen.dart';
 import '../screens/product/product_reviews_screen.dart';
+import '../screens/review/write_review_screen.dart';
 import '../models/product.dart';
+import '../models/order_detail.dart';
 
 /// App Router configuration sử dụng GoRouter
 class AppRouter {
@@ -239,6 +241,18 @@ class AppRouter {
         },
         parentNavigatorKey: _rootNavigatorKey,
       ),
+      GoRoute(
+        path: Routes.writeReview,
+        name: 'write-review',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extras = state.extra as Map<String, dynamic>;
+          return WriteReviewScreen(
+            product: extras['product'] as OrderDetail,
+            orderId: extras['orderId'] as int,
+          );
+        },
+      ),
     ],
 
     errorBuilder: (context, state) => Scaffold(
@@ -300,4 +314,5 @@ class Routes {
   static const String returns = '/returns';
   static const String returnRequest = '/return-request';
   static const String productReviews = '/product-reviews';
+  static const String writeReview = '/write-review';
 }

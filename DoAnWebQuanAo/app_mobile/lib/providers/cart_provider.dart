@@ -22,18 +22,18 @@ class CartProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get successMessage => _successMessage;
-  
+
   int get itemCount => _items.length;
   int get totalQuantity => _items.fold(0, (sum, item) => sum + item.soLuong);
   bool get isEmpty => _items.isEmpty;
 
-  /// Lấy các items đã chọn
-  List<CartItem> get selectedItems => 
-      _items.where((item) => item.daChon).toList();
-  
+  /// Lấy các items đã chọn (chỉ lấy items còn hàng)
+  List<CartItem> get selectedItems =>
+      _items.where((item) => item.daChon && !item.isOutOfStock).toList();
+
   /// Tổng tiền các items đã chọn
-  double get selectedTotal => selectedItems.fold(
-      0.0, (sum, item) => sum + item.thanhTien);
+  double get selectedTotal =>
+      selectedItems.fold(0.0, (sum, item) => sum + item.thanhTien);
 
   /// Lấy giỏ hàng từ server
   Future<void> loadCart() async {
@@ -43,7 +43,13 @@ class CartProvider extends ChangeNotifier {
 
     try {
       final response = await _cartService.getCart();
-      _items = response.items;
+      // Auto deselect out of stock items
+      _items = response.items.map((item) {
+        if (item.isOutOfStock && item.daChon) {
+          return item.copyWithSelected(false);
+        }
+        return item;
+      }).toList();
       _tongTien = response.tongTien;
     } on ApiException catch (e) {
       _error = e.message;
@@ -71,12 +77,12 @@ class CartProvider extends ChangeNotifier {
         phienBanId: variant.id,
         soLuong: quantity,
       );
-      
+
       _successMessage = message;
-      
+
       // Reload cart để sync với server
       await loadCart();
-      
+
       return true;
     } on ApiException catch (e) {
       _error = e.message;
@@ -159,14 +165,26 @@ class CartProvider extends ChangeNotifier {
     final index = _items.indexWhere((item) => item.id == gioHangId);
     if (index == -1) return;
 
+    // Không cho phép chọn nếu hết hàng
+    if (_items[index].isOutOfStock) return;
+
     _items[index] = _items[index].copyWithSelected(!_items[index].daChon);
     notifyListeners();
   }
 
   /// Chọn/Bỏ chọn tất cả
   void toggleSelectAll() {
-    final allSelected = _items.every((item) => item.daChon);
-    _items = _items.map((item) => item.copyWithSelected(!allSelected)).toList();
+    // Chỉ tính các item còn hàng
+    final availableItems = _items.where((item) => !item.isOutOfStock).toList();
+    if (availableItems.isEmpty) return;
+
+    final allSelected = availableItems.every((item) => item.daChon);
+
+    _items = _items.map((item) {
+      // Không thay đổi trạng thái của item hết hàng (luôn false)
+      if (item.isOutOfStock) return item.copyWithSelected(false);
+      return item.copyWithSelected(!allSelected);
+    }).toList();
     notifyListeners();
   }
 

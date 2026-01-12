@@ -48,9 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Welcome banner
               _buildWelcomeBanner(),
-              
+
               const SizedBox(height: AppSizes.lg),
-              
+
               // Best Selling Products
               Consumer<ProductProvider>(
                 builder: (context, provider, _) {
@@ -58,24 +58,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: AppStrings.bestSelling,
                     products: provider.bestSellingProducts,
                     isLoading: provider.isLoadingFeatured,
-                    onProductTap: (product) => 
+                    onProductTap: (product) =>
                         context.push('${Routes.products}/${product.slug}'),
-                    onFavoritePressed: (product) =>
-                        context.read<WishlistProvider>().toggleWishlist(
-                          product.id, 
-                          product: product,
-                        ),
-                    favoriteIds: context.watch<WishlistProvider>()
-                        .wishlist.map((p) => p.id).toSet(),
-                    onSeeAllPressed: () => context.push(
-                      '${Routes.products}?sort=bestselling',
-                    ),
+                    onFavoritePressed: (product) => context
+                        .read<WishlistProvider>()
+                        .toggleWishlist(product.id, product: product),
+                    favoriteIds: context
+                        .watch<WishlistProvider>()
+                        .wishlist
+                        .map((p) => p.id)
+                        .toSet(),
+                    onSeeAllPressed: () =>
+                        context.push('${Routes.products}?sort=bestselling'),
                   );
                 },
               ),
-              
+
               const SizedBox(height: AppSizes.xl),
-              
+
               // New Arrivals Products
               Consumer<ProductProvider>(
                 builder: (context, provider, _) {
@@ -83,22 +83,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: AppStrings.newArrivals,
                     products: provider.newestProducts,
                     isLoading: provider.isLoadingFeatured,
-                    onProductTap: (product) => 
+                    onProductTap: (product) =>
                         context.push('${Routes.products}/${product.slug}'),
-                    onFavoritePressed: (product) =>
-                        context.read<WishlistProvider>().toggleWishlist(
-                          product.id, 
-                          product: product,
-                        ),
-                    favoriteIds: context.watch<WishlistProvider>()
-                        .wishlist.map((p) => p.id).toSet(),
-                    onSeeAllPressed: () => context.push(
-                      '${Routes.products}?sort=newest',
-                    ),
+                    onFavoritePressed: (product) => context
+                        .read<WishlistProvider>()
+                        .toggleWishlist(product.id, product: product),
+                    favoriteIds: context
+                        .watch<WishlistProvider>()
+                        .wishlist
+                        .map((p) => p.id)
+                        .toSet(),
+                    onSeeAllPressed: () =>
+                        context.push('${Routes.products}?sort=newest'),
                   );
                 },
               ),
-              
+
               const SizedBox(height: AppSizes.xxl),
             ],
           ),
@@ -113,10 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 0,
       title: Text(
         AppStrings.appName,
-        style: TextStyle(
-          color: AppColors.primary,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
       ),
       actions: [
         // Search
@@ -124,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: const Icon(Icons.search),
           onPressed: () => context.push(Routes.search),
         ),
-        
+
         // Cart with badge
         Consumer<CartProvider>(
           builder: (context, cart, _) {
@@ -132,7 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.shopping_bag_outlined),
-                  onPressed: () => context.push(Routes.cart),
+                  // Dùng 'go' thay vì 'push' để chuyển tab trong Shell Navigation
+                  onPressed: () => context.go(Routes.cart),
                 ),
                 if (cart.itemCount > 0)
                   Positioned(
@@ -168,10 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(AppSizes.paddingLg),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withAlpha(200),
-          ],
+          colors: [AppColors.primary, AppColors.primary.withAlpha(200)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -182,10 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             'Chào mừng đến với',
-            style: TextStyle(
-              color: Colors.white.withAlpha(200),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(200), fontSize: 14),
           ),
           const SizedBox(height: 4),
           const Text(
@@ -199,10 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: AppSizes.sm),
           const Text(
             'Khám phá bộ sưu tập mới nhất',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 13),
           ),
           const SizedBox(height: AppSizes.md),
           ElevatedButton(

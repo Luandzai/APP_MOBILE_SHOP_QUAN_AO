@@ -14,13 +14,13 @@ class ReturnService {
   Future<List<ReturnRequest>> getMyReturnRequests() async {
     // Đúng endpoint: /user/returns (không phải /returns - đó là admin)
     final response = await _apiClient.get(ApiEndpoints.userReturns);
-    
+
     if (response.data is List) {
       return (response.data as List)
           .map((e) => ReturnRequest.fromJson(e))
           .toList();
     }
-    
+
     final data = response.data['data'] ?? response.data['returns'] ?? [];
     return (data as List).map((e) => ReturnRequest.fromJson(e)).toList();
   }
@@ -32,18 +32,26 @@ class ReturnService {
   }
 
   /// Tạo yêu cầu hoàn trả mới
+  ///
+  /// API Backend yêu cầu format:
+  /// POST /api/returns
+  /// Body: {
+  ///   DonHangID: orderId,
+  ///   Reason: "lý do",
+  ///   items: [{ PhienBanID, SoLuongTra, GiaHoanTra }]
+  /// }
   Future<ReturnRequest> createReturnRequest({
     required int donHangId,
-    required String lyDoHoanTra,
-    required List<Map<String, dynamic>> sanPhamHoanTra,
-    List<String>? hinhAnh,
+    required String reason,
+    required List<ReturnItemRequest> items,
   }) async {
+    // Đúng endpoint: POST /api/returns (không phải /orders/:orderId/return)
     final response = await _apiClient.post(
-      ApiEndpoints.createReturn.replaceAll(':orderId', donHangId.toString()),
+      ApiEndpoints.returns,
       data: {
-        'lyDoHoanTra': lyDoHoanTra,
-        'sanPhamHoanTra': sanPhamHoanTra,
-        if (hinhAnh != null && hinhAnh.isNotEmpty) 'hinhAnh': hinhAnh,
+        'DonHangID': donHangId,
+        'Reason': reason,
+        'items': items.map((item) => item.toJson()).toList(),
       },
     );
     return ReturnRequest.fromJson(response.data);
@@ -86,4 +94,23 @@ class ReturnService {
       'Khác',
     ];
   }
+}
+
+/// Model cho request item khi tạo yêu cầu hoàn trả
+class ReturnItemRequest {
+  final int phienBanId;
+  final int soLuongTra;
+  final double giaHoanTra;
+
+  const ReturnItemRequest({
+    required this.phienBanId,
+    required this.soLuongTra,
+    required this.giaHoanTra,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'PhienBanID': phienBanId,
+    'SoLuongTra': soLuongTra,
+    'GiaHoanTra': giaHoanTra,
+  };
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../providers/order_provider.dart';
@@ -58,6 +59,18 @@ class _OrdersScreenState extends State<OrdersScreen>
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(Routes.profile),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go(Routes.home),
+            tooltip: 'Về trang chủ',
+          ),
+        ],
         title: const Text('Đơn hàng của tôi'),
         bottom: TabBar(
           controller: _tabController,
@@ -166,10 +179,49 @@ class _OrdersScreenState extends State<OrdersScreen>
   }
 
   Future<void> _retryPayment(int orderId) async {
-    final url = await context.read<OrderProvider>().retryPayment(orderId);
-    if (url != null) {
-      // TODO: Open WebView for payment
-      debugPrint('Payment URL: $url');
+    final provider = context.read<OrderProvider>();
+    final urlString = await provider.retryPayment(orderId);
+
+    if (urlString != null && mounted) {
+      final url = Uri.parse(urlString);
+      try {
+        debugPrint('Launching payment URL: $url');
+        bool launched = false;
+        if (await canLaunchUrl(url)) {
+          launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+
+        if (!launched) {
+          debugPrint(
+            'Failed to launch with externalApplication, trying platformDefault',
+          );
+          launched = await launchUrl(url, mode: LaunchMode.platformDefault);
+        }
+
+        if (!launched && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Không thể mở liên kết. Vui lòng kiểm tra trình duyệt.',
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        debugPrint('Error launching payment URL: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Lỗi mở liên kết thanh toán')),
+          );
+        }
+      }
+    } else if (provider.error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.error!),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 

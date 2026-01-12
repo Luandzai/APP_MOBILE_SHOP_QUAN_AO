@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/utils/formatters.dart';
@@ -53,9 +54,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               children: [
                 // Header
                 _buildHeader(order, provider),
-                
+
                 const SizedBox(height: AppSizes.sm),
-                
+
                 // Shipping info
                 _buildSection(
                   title: 'Thông tin giao hàng',
@@ -70,29 +71,40 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: AppSizes.sm),
-                
+
                 // Products
                 _buildSection(
                   title: 'Sản phẩm (${order.chiTiet.length})',
                   child: Column(
-                    children: order.chiTiet.map((item) => _buildProductItem(item)).toList(),
+                    children: order.chiTiet
+                        .map((item) => _buildProductItem(item, order))
+                        .toList(),
                   ),
                 ),
-                
+
                 const SizedBox(height: AppSizes.sm),
-                
+
                 // Payment info
                 _buildSection(
                   title: 'Thông tin thanh toán',
                   child: Column(
                     children: [
-                      _buildSummaryRow('Tạm tính', Formatters.currency(order.tongTienSanPham)),
-                      _buildSummaryRow('Phí vận chuyển', Formatters.currency(order.phiVanChuyen)),
+                      _buildSummaryRow(
+                        'Tạm tính',
+                        Formatters.currency(order.tongTienSanPham),
+                      ),
+                      _buildSummaryRow(
+                        'Phí vận chuyển',
+                        Formatters.currency(order.phiVanChuyen),
+                      ),
                       if (order.giamGia > 0)
-                        _buildSummaryRow('Giảm giá', '-${Formatters.currency(order.giamGia)}', 
-                            color: AppColors.success),
+                        _buildSummaryRow(
+                          'Giảm giá',
+                          '-${Formatters.currency(order.giamGia)}',
+                          color: AppColors.success,
+                        ),
                       const Divider(),
                       _buildSummaryRow(
                         'Tổng thanh toán',
@@ -108,13 +120,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: AppSizes.sm),
-                
+
                 // Actions
-                if (order.canCancel || order.canRetryPayment || order.canRequestReturn)
+                if (order.canCancel ||
+                    order.canRetryPayment ||
+                    order.canRequestReturn)
                   _buildActions(order, provider),
-                
+
                 const SizedBox(height: AppSizes.xl),
               ],
             ),
@@ -147,10 +161,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           const SizedBox(height: 4),
           Text(
             'Đặt lúc: ${Formatters.dateTime(order.ngayDatHang)}',
-            style: const TextStyle(
-              color: AppColors.textHint,
-              fontSize: 13,
-            ),
+            style: const TextStyle(color: AppColors.textHint, fontSize: 13),
           ),
         ],
       ),
@@ -166,10 +177,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
           const SizedBox(height: AppSizes.sm),
           child,
@@ -186,15 +194,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         children: [
           Icon(icon, size: 18, color: AppColors.textSecondary),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 14)),
-          ),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
         ],
       ),
     );
   }
 
-  Widget _buildProductItem(item) {
+  Widget _buildProductItem(item, order) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.sm),
       child: Row(
@@ -244,6 +250,45 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     Text('x${item.soLuong}'),
                   ],
                 ),
+                if ((order.trangThai == 'DA_GIAO' ||
+                        order.trangThai == 'HOAN_THANH') &&
+                    !item.daDanhGia)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: SizedBox(
+                      height: 32,
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          final result = await context.push(
+                            Routes.writeReview,
+                            extra: {'product': item, 'orderId': order.id},
+                          );
+                          if (result == true && mounted) {
+                            context.read<OrderProvider>().loadOrderDetail(
+                              order.id,
+                            );
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppSizes.radiusSm,
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          'Viết đánh giá',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -252,7 +297,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {Color? color, bool isTotal = false}) {
+  Widget _buildSummaryRow(
+    String label,
+    String value, {
+    Color? color,
+    bool isTotal = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -287,16 +337,28 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             Expanded(
               child: OutlinedButton(
                 onPressed: () => _cancelOrder(order.id, provider),
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                ),
                 child: const Text('Hủy đơn'),
               ),
             ),
           if (order.canCancel && order.canRequestReturn)
             const SizedBox(width: AppSizes.sm),
+          if (order.canRetryPayment) ...[
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => _retryPayment(order.id, provider),
+                child: const Text('Thanh toán lại'),
+              ),
+            ),
+            if (order.canCancel) const SizedBox(width: AppSizes.sm),
+          ],
           if (order.canRequestReturn)
             Expanded(
               child: ElevatedButton(
-                onPressed: () => context.push('${Routes.returnRequest}/${order.id}'),
+                onPressed: () =>
+                    context.push('${Routes.returnRequest}/${order.id}'),
                 child: const Text('Yêu cầu hoàn trả'),
               ),
             ),
@@ -307,10 +369,59 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   String _getPaymentMethodText(String method) {
     switch (method) {
-      case 'COD': return 'Thanh toán khi nhận hàng';
-      case 'VNPAY': return 'VNPAY';
-      case 'MOMO': return 'MoMo';
-      default: return method;
+      case 'COD':
+        return 'Thanh toán khi nhận hàng';
+      case 'VNPAY':
+        return 'VNPAY';
+      case 'MOMO':
+        return 'MoMo';
+      default:
+        return method;
+    }
+  }
+
+  Future<void> _retryPayment(int orderId, OrderProvider provider) async {
+    final urlString = await provider.retryPayment(orderId);
+    if (urlString != null && mounted) {
+      final url = Uri.parse(urlString);
+      try {
+        debugPrint('Launching payment URL: $url');
+        bool launched = false;
+        if (await canLaunchUrl(url)) {
+          launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+
+        if (!launched) {
+          debugPrint(
+            'Failed/Cannot launch with externalApplication, trying platformDefault',
+          );
+          launched = await launchUrl(url, mode: LaunchMode.platformDefault);
+        }
+
+        if (!launched && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Không thể mở liên kết. Vui lòng kiểm tra trình duyệt.',
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        debugPrint('Error launching payment URL: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Lỗi mở liên kết thanh toán')),
+          );
+        }
+      }
+    } else if (provider.error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.error!),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
@@ -321,7 +432,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         title: const Text('Xác nhận hủy đơn'),
         content: const Text('Bạn có chắc muốn hủy đơn hàng này?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Không')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Không'),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),

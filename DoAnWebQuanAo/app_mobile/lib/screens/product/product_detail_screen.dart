@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/constants/app_strings.dart';
@@ -13,6 +14,7 @@ import '../../providers/wishlist_provider.dart';
 import '../../models/voucher.dart';
 import '../../providers/voucher_provider.dart';
 import '../../widgets/product/product_reviews.dart';
+import '../../router/app_router.dart';
 
 /// Product Detail Screen - Chi tiáº¿t sáº£n pháº©m
 class ProductDetailScreen extends StatefulWidget {
@@ -168,15 +170,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return result;
   }
 
-  Future<void> _addToCart() async {
+  Future<bool> _addToCart({bool showMessage = true}) async {
     final product = context.read<ProductProvider>().currentProduct;
-    if (product == null || _selectedVariant == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng chọn phiĂªn báº£n sáº£n pháº©m'),
-        ),
-      );
-      return;
+
+    // Check if product is loaded
+    if (product == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Không thể thêm sản phẩm')));
+      return false;
+    }
+
+    // Check if variant is selected (user must choose all attributes)
+    if (_selectedVariant == null) {
+      // Build dynamic message based on available attributes
+      final missingAttrs = _availableAttributes
+          .where((attr) => !_selectedOptions.containsKey(attr['name']))
+          .map((attr) => attr['name'] as String)
+          .toList();
+
+      final message = missingAttrs.isEmpty
+          ? 'Vui lòng chọn phiên bản sản phẩm'
+          : 'Vui lòng chọn ${missingAttrs.join(' và ')}';
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+      return false;
     }
 
     final success = await context.read<CartProvider>().addToCart(
@@ -185,13 +205,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       quantity: _quantity,
     );
 
-    if (success && mounted) {
+    if (success && mounted && showMessage) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('ÄĂ£ thĂªm vĂ o giá» hĂ ng'),
+          content: Text('Đã thêm vào giỏ hàng'),
           backgroundColor: AppColors.success,
         ),
       );
+    }
+    return success;
+  }
+
+  Future<void> _buyNow() async {
+    final success = await _addToCart(showMessage: false);
+    if (success && mounted) {
+      context.push(Routes.checkout);
     }
   }
 
@@ -211,12 +239,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
           final product = provider.currentProduct;
           if (product == null) {
-            return const Center(child: Text('KhĂ´ng tĂ¬m tháº¥y sáº£n pháº©m'));
+            return const Center(child: Text('Không tìm thấy sản phẩm'));
           }
 
-          // Auto-select first variant if not selected
-          if (_selectedVariant == null && product.phienBan.isNotEmpty) {
-            _selectedVariant = product.phienBan.first;
+          // Parse attributes để user tự chọn
+          if (_availableAttributes.isEmpty && product.phienBan.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _parseAttributes(product);
+            });
           }
 
           return CustomScrollView(
@@ -541,38 +571,59 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ? () => _selectOption(attributeName, value)
                   : null,
               borderRadius: BorderRadius.circular(8),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primary.withAlpha(25)
-                      : (isAvailable ? Colors.white : Colors.grey[100]),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppColors.primary
-                        : (isAvailable ? Colors.grey[300]! : Colors.grey[200]!),
-                    width: isSelected ? 2 : 1,
+              child: Stack(
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      // Selected: primary color solid
+                      // Available: white with dark border
+                      // Unavailable: light grey
+                      color: isSelected
+                          ? AppColors.primary
+                          : (isAvailable ? Colors.white : Colors.grey[200]),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : (isAvailable
+                                  ? Colors.grey[400]!
+                                  : Colors.grey[300]!),
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : (isAvailable
+                                  ? AppColors.textPrimary
+                                  : Colors.grey[500]),
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                        fontSize: 14,
+                        decoration: isAvailable
+                            ? TextDecoration.none
+                            : TextDecoration.lineThrough,
+                        decorationColor: Colors.grey[500],
+                      ),
+                    ),
                   ),
-                ),
-                child: Text(
-                  value,
-                  style: TextStyle(
-                    color: isSelected
-                        ? AppColors.primary
-                        : (isAvailable
-                              ? AppColors.textPrimary
-                              : AppColors.textHint),
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
-                    fontSize: 14,
-                  ),
-                ),
+                  // Diagonal line for out of stock
+                  if (!isAvailable)
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CustomPaint(painter: _DiagonalLinePainter()),
+                      ),
+                    ),
+                ],
               ),
             );
           }).toList(),
@@ -582,7 +633,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _buildQuantitySection() {
-    final maxQty = _selectedVariant?.soLuongTonKho ?? 10;
+    final maxQty = _selectedVariant?.soLuongTonKho ?? 0;
+    final isEnabled = _selectedVariant != null && maxQty > 0;
 
     return Row(
       children: [
@@ -595,34 +647,65 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         const SizedBox(width: AppSizes.md),
         Container(
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(
+              color: isEnabled ? AppColors.divider : Colors.grey[300]!,
+            ),
             borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+            color: isEnabled ? null : Colors.grey[100],
           ),
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.remove, size: 18),
-                onPressed: _quantity > 1
+                icon: Icon(
+                  Icons.remove,
+                  size: 18,
+                  color: isEnabled && _quantity > 1
+                      ? AppColors.textPrimary
+                      : Colors.grey[400],
+                ),
+                onPressed: isEnabled && _quantity > 1
                     ? () => setState(() => _quantity--)
                     : null,
               ),
               SizedBox(
                 width: 40,
                 child: Text(
-                  '$_quantity',
+                  isEnabled ? '$_quantity' : '-',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: isEnabled ? AppColors.textPrimary : Colors.grey[400],
+                  ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.add, size: 18),
-                onPressed: _quantity < maxQty
+                icon: Icon(
+                  Icons.add,
+                  size: 18,
+                  color: isEnabled && _quantity < maxQty
+                      ? AppColors.textPrimary
+                      : Colors.grey[400],
+                ),
+                onPressed: isEnabled && _quantity < maxQty
                     ? () => setState(() => _quantity++)
                     : null,
               ),
             ],
           ),
         ),
+        // Show stock info next to quantity
+        if (_selectedVariant != null && maxQty == 0)
+          Padding(
+            padding: const EdgeInsets.only(left: AppSizes.sm),
+            child: Text(
+              'Hết hàng',
+              style: TextStyle(
+                color: AppColors.error,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -755,10 +838,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 // Add to cart
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: cart.isLoading ? null : _addToCart,
+                    onPressed: cart.isLoading ? null : () => _addToCart(),
                     icon: const Icon(Icons.shopping_cart_outlined),
                     label: Text(
-                      cart.isLoading ? 'Äang thĂªm...' : AppStrings.addToCart,
+                      cart.isLoading ? 'Đang thêm...' : AppStrings.addToCart,
                     ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -769,9 +852,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 // Buy now
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: Navigate to checkout
-                    },
+                    onPressed: cart.isLoading ? null : _buyNow,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
@@ -785,4 +866,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
     );
   }
+}
+
+/// Custom painter for diagonal line on out-of-stock options
+class _DiagonalLinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey[400]!.withAlpha(150)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawLine(Offset(0, size.height), Offset(size.width, 0), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

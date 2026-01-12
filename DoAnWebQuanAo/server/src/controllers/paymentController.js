@@ -16,6 +16,9 @@ exports.vnpayReturn = async (req, res) => {
   }`;
   // ===================================
 
+  // Deep link scheme cho mobile app
+  const appDeepLink = "blankcanvas://payment-result/";
+
   if (isVerified) {
     const vnp_ResponseCode = vnp_Params["vnp_ResponseCode"];
     const vnp_TxnRef = vnp_Params["vnp_TxnRef"]; // Mã đơn hàng
@@ -59,22 +62,76 @@ exports.vnpayReturn = async (req, res) => {
     }
     // === KẾT THÚC CẬP NHẬT DB ===
 
-    if (vnp_ResponseCode === "00") {
-      // Thanh toán thành công -> Chuyển hướng về trang Kết quả
-      res.redirect(
-        `${clientReturnUrl}/payment/result?success=true&orderId=${vnp_TxnRef}`
-      );
-    } else {
-      // Thanh toán thất bại -> Chuyển hướng về trang Kết quả
-      res.redirect(
-        `${clientReturnUrl}/payment/result?success=false&orderId=${vnp_TxnRef}`
-      );
-    }
+    const isSuccess = vnp_ResponseCode === "00";
+    const successParam = isSuccess ? "true" : "false";
+
+    // Trả về HTML để redirect Deep Link hoặc Web
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Kết quả thanh toán VNPAY</title>
+        <style>
+          body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+          }
+          .container { text-align: center; padding: 20px; }
+          .spinner { 
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid #005a9e; 
+            border-radius: 50%; 
+            width: 40px; 
+            height: 40px; 
+            animation: spin 1s linear infinite; 
+            margin: 20px auto;
+          }
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="spinner"></div>
+          <p>Đang xử lý kết quả thanh toán...</p>
+        </div>
+        <script>
+          // Thử mở app bằng deep link
+          // VNPAY parameters to pass back to app
+          var appUrl = "${appDeepLink}?success=${successParam}&orderId=${vnp_TxnRef}&vnp_ResponseCode=${vnp_ResponseCode}&message=${isSuccess ? 'Success' : 'Failed'}";
+          var webUrl = "${clientReturnUrl}/payment/result?success=${successParam}&orderId=${vnp_TxnRef}";
+          
+          // Tạo iframe ẩn để thử mở app
+          var iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = appUrl;
+          document.body.appendChild(iframe);
+          
+          // Cũng thử window.location
+          setTimeout(function() {
+            window.location.href = appUrl;
+          }, 100);
+          
+          // Nếu sau 2 giây vẫn còn ở trang này, redirect về web
+          setTimeout(function() {
+            window.location.href = webUrl;
+          }, 2000);
+        </script>
+      </body>
+      </html>
+    `);
+
   } else {
     // Chữ ký không hợp lệ
-    res.redirect(
-      `${clientReturnUrl}/payment/result?success=false&message=InvalidSignature`
-    );
+    res.send(`
+      <script>
+        window.location.href = "${clientReturnUrl}/payment/result?success=false&message=InvalidSignature";
+      </script>
+    `);
   }
 };
 
@@ -151,6 +208,9 @@ exports.momoReturn = async (req, res) => {
   const clientReturnUrl = `${
     process.env.CLIENT_URL || "http://localhost:5173"
   }`;
+  
+  // Deep link scheme cho mobile app
+  const appDeepLink = "blankcanvas://payment-result/";
 
   // Tách orderId từ chuỗi "ID_timestamp"
   const donHangID = queryParams.orderId
@@ -168,19 +228,70 @@ exports.momoReturn = async (req, res) => {
     }
 
     // 2. Kiểm tra kết quả (so sánh cả string và number vì MoMo có thể trả về cả 2)
-    if (queryParams.resultCode === "0" || queryParams.resultCode === 0) {
-      // Thành công
-      // Chúng ta không cập nhật CSDL ở đây, chúng ta chờ IPN
-      // Chỉ chuyển hướng người dùng
-      res.redirect(
-        `${clientReturnUrl}/payment/result?success=true&orderId=${donHangID}`
-      );
-    } else {
-      // Thất bại
-      res.redirect(
-        `${clientReturnUrl}/payment/result?success=false&orderId=${donHangID}`
-      );
-    }
+    const isSuccess = queryParams.resultCode === "0" || queryParams.resultCode === 0;
+    
+    // 3. Kiểm tra request từ mobile app hay web
+    // MoMo trên mobile sẽ mở trong browser, ta dùng extraData hoặc redirect về deep link
+    // Trả về HTML với auto-redirect để thử mở app trước, nếu không được thì redirect web
+    const successParam = isSuccess ? "true" : "false";
+    
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Đang xử lý thanh toán...</title>
+        <style>
+          body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+          }
+          .container { text-align: center; padding: 20px; }
+          .spinner { 
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid #ae2070; 
+            border-radius: 50%; 
+            width: 40px; 
+            height: 40px; 
+            animation: spin 1s linear infinite; 
+            margin: 20px auto;
+          }
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="spinner"></div>
+          <p>Đang quay về ứng dụng...</p>
+        </div>
+        <script>
+          // Thử mở app bằng deep link
+          var appUrl = "${appDeepLink}?success=${successParam}&orderId=${donHangID}";
+          var webUrl = "${clientReturnUrl}/payment/result?success=${successParam}&orderId=${donHangID}";
+          
+          // Tạo iframe ẩn để thử mở app
+          var iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = appUrl;
+          document.body.appendChild(iframe);
+          
+          // Cũng thử window.location
+          setTimeout(function() {
+            window.location.href = appUrl;
+          }, 100);
+          
+          // Nếu sau 2 giây vẫn còn ở trang này, redirect về web
+          setTimeout(function() {
+            window.location.href = webUrl;
+          }, 2000);
+        </script>
+      </body>
+      </html>
+    `);
   } catch (error) {
     console.error("Lỗi xử lý MoMo Return:", error);
     res.redirect(
